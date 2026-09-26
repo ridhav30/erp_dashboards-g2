@@ -1,0 +1,77 @@
+/* ==========================================================================
+   Full Width Page Layout - G2 Accounts Dashboard
+   Aligns body content to the exact X-level of the breadcrumb home icon
+   ========================================================================== */
+
+/* 1. Reset page-level max-width variables */
+[data-page-route="g2-accounts-dashboar"],
+#page-g2-accounts-dashboar,
+.full-width-page {
+	--page-max-width: 100% !important;
+}
+
+/* 2. Container full-width overrides with consistent horizontal alignment */
+[data-page-route="g2-accounts-dashboar"] .page-head .container,
+[data-page-route="g2-accounts-dashboar"] .container.page-body,
+[data-page-route="g2-accounts-dashboar"] .page-body.container,
+[data-page-route="g2-accounts-dashboar"] .page-body .container,
+#page-g2-accounts-dashboar .page-head .container,
+#page-g2-accounts-dashboar .container.page-body,
+#page-g2-accounts-dashboar .page-body.container,
+#page-g2-accounts-dashboar .page-body .container,
+.full-width-page .page-head .container,
+.full-width-page .container.page-body,
+.full-width-page .page-body.container,
+.full-width-page .page-body .container {
+	max-width: 100% !important;
+	width: 100% !important;
+	margin-left: 0 !important;
+	margin-right: 0 !important;
+	padding-left: var(--padding-md, 15px) !important;
+	padding-right: var(--padding-md, 15px) !important;
+	box-sizing: border-box !important;
+}
+
+/* 3. Strip nested padding and margins from intermediate body containers
+      so the content starts at the exact X-level of the breadcrumb home icon */
+[data-page-route="g2-accounts-dashboar"] .page-wrapper,
+[data-page-route="g2-accounts-dashboar"] .page-content,
+[data-page-route="g2-accounts-dashboar"] .layout-main,
+[data-page-route="g2-accounts-dashboar"] .layout-main-section-wrapper,
+[data-page-route="g2-accounts-dashboar"] .layout-main-section,
+[data-page-route="g2-accounts-dashboar"] .page-main,
+#page-g2-accounts-dashboar .page-wrapper,
+#page-g2-accounts-dashboar .page-content,
+#page-g2-accounts-dashboar .layout-main,
+#page-g2-accounts-dashboar .layout-main-section-wrapper,
+#page-g2-accounts-dashboar .layout-main-section,
+#page-g2-accounts-dashboar .page-main,
+.full-width-page .page-wrapper,
+.full-width-page .page-content,
+.full-width-page .layout-main,
+.full-width-page .layout-main-section-wrapper,
+.full-width-page .layout-main-section,
+.full-width-page .page-main {
+	max-width: 100% !important;
+	width: 100% !important;
+	margin-left: 0 !important;
+	margin-right: 0 !important;
+	padding-left: 0 !important;
+	padding-right: 0 !important;
+	border: none !important;
+	box-shadow: none !important;
+	box-sizing: border-box !important;
+}
+
+/* 4. Dashboard root container styles aligned with the breadcrumb home icon */
+.g2-accounts-dashboard {
+	width: 100% !important;
+	min-height: calc(100vh - 120px);
+	display: flex;
+	flex-direction: column;
+	gap: var(--margin-md, 16px);
+	padding: var(--padding-md, 16px) 0;
+	margin-left: 0 !important;
+	margin-right: 0 !important;
+	box-sizing: border-box !important;
+}
