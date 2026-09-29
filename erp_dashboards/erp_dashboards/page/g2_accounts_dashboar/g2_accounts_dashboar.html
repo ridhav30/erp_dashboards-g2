@@ -1,11 +1,192 @@
 <div class="g2-accounts-dashboard">
-	<!-- Full-width Dashboard Container -->
-	<div class="dashboard-header-section">
-		<!-- Header / Controls / Filters -->
-	</div>
+	<!-- Speedometer KPI Metric Grid -->
+	<div class="dashboard-kpi-grid">
+		<!-- 1. Total Outgoing Bills in DH -->
+		<div class="kpi-card speedometer-card outgoing-bills" id="card-outgoing-bills">
+			<div class="kpi-card-header">
+				<span class="kpi-title">TOTAL OUTGOING BILLS</span>
+				<span class="kpi-badge outgoing">Outgoing</span>
+			</div>
 
-	<div class="dashboard-body-section">
-		<!-- Main Content Area -->
-		 <h1>Hello</h1>
+			<!-- Speedometer Gauge -->
+			<div class="speedometer-container">
+				<svg class="speedometer-svg" viewBox="0 0 200 120">
+					<defs>
+						<linearGradient id="grad-outgoing-bills" x1="0%" y1="0%" x2="100%" y2="0%">
+							<stop offset="0%" stop-color="#f59e0b" />
+							<stop offset="100%" stop-color="#ef4444" />
+						</linearGradient>
+					</defs>
+					<!-- Background Track Arc -->
+					<path class="gauge-bg-arc" d="M 25 100 A 75 75 0 0 1 175 100" />
+					<!-- Active Value Arc -->
+					<path class="gauge-val-arc arc-outgoing-bills" d="M 25 100 A 75 75 0 0 1 175 100" stroke="url(#grad-outgoing-bills)" />
+					<!-- Tick Marks -->
+					<line x1="25" y1="100" x2="33" y2="100" class="gauge-tick" />
+					<line x1="47" y1="47" x2="53" y2="53" class="gauge-tick" />
+					<line x1="100" y1="25" x2="100" y2="33" class="gauge-tick" />
+					<line x1="153" y1="47" x2="147" y2="53" class="gauge-tick" />
+					<line x1="175" y1="100" x2="167" y2="100" class="gauge-tick" />
+					<!-- Needle -->
+					<g class="gauge-needle-group needle-outgoing-bills" style="transform: rotate(-90deg);">
+						<polygon points="97,100 100,28 103,100 100,105" class="gauge-needle needle-orange" />
+						<circle cx="100" cy="100" r="7" class="gauge-pivot-outer" />
+						<circle cx="100" cy="100" r="3.5" class="gauge-pivot-inner" />
+					</g>
+				</svg>
+				<div class="gauge-scale-labels">
+					<span class="scale-min">0 DH</span>
+					<span class="scale-max" id="max-outgoing-bills">100K DH</span>
+				</div>
+			</div>
+
+			<div class="kpi-card-body">
+				<div class="kpi-value-wrapper">
+					<span class="kpi-value" id="kpi-outgoing-bills-val">0.00</span>
+					<span class="kpi-currency">DH</span>
+				</div>
+			</div>
+			<div class="kpi-card-footer">
+				<span class="kpi-subtext">Total bills payable</span>
+			</div>
+		</div>
+
+		<!-- 2. Total Incoming Bills in DH -->
+		<div class="kpi-card speedometer-card incoming-bills" id="card-incoming-bills">
+			<div class="kpi-card-header">
+				<span class="kpi-title">TOTAL INCOMING BILLS</span>
+				<span class="kpi-badge incoming">Incoming</span>
+			</div>
+
+			<!-- Speedometer Gauge -->
+			<div class="speedometer-container">
+				<svg class="speedometer-svg" viewBox="0 0 200 120">
+					<defs>
+						<linearGradient id="grad-incoming-bills" x1="0%" y1="0%" x2="100%" y2="0%">
+							<stop offset="0%" stop-color="#06b6d4" />
+							<stop offset="100%" stop-color="#10b981" />
+						</linearGradient>
+					</defs>
+					<path class="gauge-bg-arc" d="M 25 100 A 75 75 0 0 1 175 100" />
+					<path class="gauge-val-arc arc-incoming-bills" d="M 25 100 A 75 75 0 0 1 175 100" stroke="url(#grad-incoming-bills)" />
+					<line x1="25" y1="100" x2="33" y2="100" class="gauge-tick" />
+					<line x1="47" y1="47" x2="53" y2="53" class="gauge-tick" />
+					<line x1="100" y1="25" x2="100" y2="33" class="gauge-tick" />
+					<line x1="153" y1="47" x2="147" y2="53" class="gauge-tick" />
+					<line x1="175" y1="100" x2="167" y2="100" class="gauge-tick" />
+					<g class="gauge-needle-group needle-incoming-bills" style="transform: rotate(-90deg);">
+						<polygon points="97,100 100,28 103,100 100,105" class="gauge-needle needle-emerald" />
+						<circle cx="100" cy="100" r="7" class="gauge-pivot-outer" />
+						<circle cx="100" cy="100" r="3.5" class="gauge-pivot-inner" />
+					</g>
+				</svg>
+				<div class="gauge-scale-labels">
+					<span class="scale-min">0 DH</span>
+					<span class="scale-max" id="max-incoming-bills">100K DH</span>
+				</div>
+			</div>
+
+			<div class="kpi-card-body">
+				<div class="kpi-value-wrapper">
+					<span class="kpi-value" id="kpi-incoming-bills-val">0.00</span>
+					<span class="kpi-currency">DH</span>
+				</div>
+			</div>
+			<div class="kpi-card-footer">
+				<span class="kpi-subtext">Total bills receivable</span>
+			</div>
+		</div>
+
+		<!-- 3. Total Incoming Payment in DH -->
+		<div class="kpi-card speedometer-card incoming-payment" id="card-incoming-payment">
+			<div class="kpi-card-header">
+				<span class="kpi-title">TOTAL INCOMING PAYMENT</span>
+				<span class="kpi-badge incoming">Received</span>
+			</div>
+
+			<!-- Speedometer Gauge -->
+			<div class="speedometer-container">
+				<svg class="speedometer-svg" viewBox="0 0 200 120">
+					<defs>
+						<linearGradient id="grad-incoming-payment" x1="0%" y1="0%" x2="100%" y2="0%">
+							<stop offset="0%" stop-color="#38bdf8" />
+							<stop offset="100%" stop-color="#0284c7" />
+						</linearGradient>
+					</defs>
+					<path class="gauge-bg-arc" d="M 25 100 A 75 75 0 0 1 175 100" />
+					<path class="gauge-val-arc arc-incoming-payment" d="M 25 100 A 75 75 0 0 1 175 100" stroke="url(#grad-incoming-payment)" />
+					<line x1="25" y1="100" x2="33" y2="100" class="gauge-tick" />
+					<line x1="47" y1="47" x2="53" y2="53" class="gauge-tick" />
+					<line x1="100" y1="25" x2="100" y2="33" class="gauge-tick" />
+					<line x1="153" y1="47" x2="147" y2="53" class="gauge-tick" />
+					<line x1="175" y1="100" x2="167" y2="100" class="gauge-tick" />
+					<g class="gauge-needle-group needle-incoming-payment" style="transform: rotate(-90deg);">
+						<polygon points="97,100 100,28 103,100 100,105" class="gauge-needle needle-sky" />
+						<circle cx="100" cy="100" r="7" class="gauge-pivot-outer" />
+						<circle cx="100" cy="100" r="3.5" class="gauge-pivot-inner" />
+					</g>
+				</svg>
+				<div class="gauge-scale-labels">
+					<span class="scale-min">0 DH</span>
+					<span class="scale-max" id="max-incoming-payment">100K DH</span>
+				</div>
+			</div>
+
+			<div class="kpi-card-body">
+				<div class="kpi-value-wrapper">
+					<span class="kpi-value" id="kpi-incoming-payment-val">0.00</span>
+					<span class="kpi-currency">DH</span>
+				</div>
+			</div>
+			<div class="kpi-card-footer">
+				<span class="kpi-subtext">Total payments received</span>
+			</div>
+		</div>
+
+		<!-- 4. Total Outgoing Payment in DH -->
+		<div class="kpi-card speedometer-card outgoing-payment" id="card-outgoing-payment">
+			<div class="kpi-card-header">
+				<span class="kpi-title">TOTAL OUTGOING PAYMENT</span>
+				<span class="kpi-badge outgoing">Paid</span>
+			</div>
+
+			<!-- Speedometer Gauge -->
+			<div class="speedometer-container">
+				<svg class="speedometer-svg" viewBox="0 0 200 120">
+					<defs>
+						<linearGradient id="grad-outgoing-payment" x1="0%" y1="0%" x2="100%" y2="0%">
+							<stop offset="0%" stop-color="#a855f7" />
+							<stop offset="100%" stop-color="#6366f1" />
+						</linearGradient>
+					</defs>
+					<path class="gauge-bg-arc" d="M 25 100 A 75 75 0 0 1 175 100" />
+					<path class="gauge-val-arc arc-outgoing-payment" d="M 25 100 A 75 75 0 0 1 175 100" stroke="url(#grad-outgoing-payment)" />
+					<line x1="25" y1="100" x2="33" y2="100" class="gauge-tick" />
+					<line x1="47" y1="47" x2="53" y2="53" class="gauge-tick" />
+					<line x1="100" y1="25" x2="100" y2="33" class="gauge-tick" />
+					<line x1="153" y1="47" x2="147" y2="53" class="gauge-tick" />
+					<line x1="175" y1="100" x2="167" y2="100" class="gauge-tick" />
+					<g class="gauge-needle-group needle-outgoing-payment" style="transform: rotate(-90deg);">
+						<polygon points="97,100 100,28 103,100 100,105" class="gauge-needle needle-purple" />
+						<circle cx="100" cy="100" r="7" class="gauge-pivot-outer" />
+						<circle cx="100" cy="100" r="3.5" class="gauge-pivot-inner" />
+					</g>
+				</svg>
+				<div class="gauge-scale-labels">
+					<span class="scale-min">0 DH</span>
+					<span class="scale-max" id="max-outgoing-payment">100K DH</span>
+				</div>
+			</div>
+
+			<div class="kpi-card-body">
+				<div class="kpi-value-wrapper">
+					<span class="kpi-value" id="kpi-outgoing-payment-val">0.00</span>
+					<span class="kpi-currency">DH</span>
+				</div>
+			</div>
+			<div class="kpi-card-footer">
+				<span class="kpi-subtext">Total payments made</span>
+			</div>
+		</div>
 	</div>
 </div>
