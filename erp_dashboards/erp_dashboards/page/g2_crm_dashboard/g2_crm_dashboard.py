@@ -107,3 +107,14 @@ def get_crm_summary():
 			frappe.log_error(f"CRM Dashboard {key} Error", str(e))
 
 	return summary
+
+
+def on_crm_doc_change(doc=None, method=None):
+	"""
+	Publish real-time event via Frappe WebSocket whenever Lead or Opportunity changes.
+	"""
+	try:
+		frappe.publish_realtime("crm_dashboard_update")
+	except Exception:
+		pass
+

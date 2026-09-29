@@ -144,13 +144,18 @@ app_license = "mit"
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-# 	"*": {
-# 		"on_update": "method",
-# 		"on_cancel": "method",
-# 		"on_trash": "method"
-# 	}
-# }
+doc_events = {
+	"Lead": {
+		"on_update": "erp_dashboards.erp_dashboards.page.g2_crm_dashboard.g2_crm_dashboard.on_crm_doc_change",
+		"after_insert": "erp_dashboards.erp_dashboards.page.g2_crm_dashboard.g2_crm_dashboard.on_crm_doc_change",
+		"on_trash": "erp_dashboards.erp_dashboards.page.g2_crm_dashboard.g2_crm_dashboard.on_crm_doc_change",
+	},
+	"Opportunity": {
+		"on_update": "erp_dashboards.erp_dashboards.page.g2_crm_dashboard.g2_crm_dashboard.on_crm_doc_change",
+		"after_insert": "erp_dashboards.erp_dashboards.page.g2_crm_dashboard.g2_crm_dashboard.on_crm_doc_change",
+		"on_trash": "erp_dashboards.erp_dashboards.page.g2_crm_dashboard.g2_crm_dashboard.on_crm_doc_change",
+	},
+}
 
 # Scheduled Tasks
 # ---------------

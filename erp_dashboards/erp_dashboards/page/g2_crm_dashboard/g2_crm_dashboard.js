@@ -140,6 +140,9 @@ frappe.pages['g2-crm-dashboard'].on_page_load = function(wrapper) {
 		});
 	}
 
+	// Show Live indicator in page header
+	page.set_indicator(__('Live'), 'green');
+
 	// Initial real data fetch on page load
 	load_crm_data();
 
@@ -147,4 +150,39 @@ frappe.pages['g2-crm-dashboard'].on_page_load = function(wrapper) {
 	page.set_secondary_action(__('Refresh'), function() {
 		load_crm_data();
 	}, 'refresh');
+
+	// --- REAL-TIME ENGINE ---
+	// 1. Listen to real-time events via Frappe WebSockets (Socket.IO)
+	frappe.realtime.on('crm_dashboard_update', function() {
+		load_crm_data();
+	});
+
+	frappe.realtime.on('doc_update', function(data) {
+		if (data && (data.doctype === 'Lead' || data.doctype === 'Opportunity')) {
+			load_crm_data();
+		}
+	});
+
+	// 2. Real-time auto-polling interval (every 6 seconds)
+	var live_timer = setInterval(function() {
+		if ($('.g2-crm-dashboard').length) {
+			load_crm_data();
+		} else {
+			clearInterval(live_timer);
+		}
+	}, 6000);
+
+	// 3. Real-time auto-refresh when window/tab regains focus
+	$(window).on('focus.crm_dashboard', function() {
+		if ($('.g2-crm-dashboard').length) {
+			load_crm_data();
+		}
+	});
+
+	// Clean up listeners when navigating away from the page
+	wrapper.addEventListener('remove', function() {
+		clearInterval(live_timer);
+		frappe.realtime.off('crm_dashboard_update');
+		$(window).off('focus.crm_dashboard');
+	});
 };
