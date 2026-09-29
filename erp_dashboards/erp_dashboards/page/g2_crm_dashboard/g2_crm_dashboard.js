@@ -902,43 +902,86 @@ frappe.pages['g2-crm-dashboard'].on_page_load = function(wrapper) {
 		});
 	}
 
-	// Fetch real-world CRM counts from backend
-	function load_crm_data() {
-		frappe.call({
-			method: 'erp_dashboards.erp_dashboards.page.g2_crm_dashboard.g2_crm_dashboard.get_crm_summary',
-			callback: function(r) {
-				var data = (r && r.message) ? r.message : {
-					new_leads: 0,
-					new_opportunities: 0,
-					won_opportunities: 0,
-					open_opportunities: 0
-				};
-				render_crm_data(data);
-			}
-		});
+	// Render complete dashboard data directly from WebSocket payload or initial load
+	function render_all_dashboard_data(data) {
+		if (!data) return;
 
-		// Refresh all CRM charts
-		load_incoming_leads_chart();
-		load_opportunity_trends_chart();
-		load_won_opportunities_chart();
-		load_territory_chart();
-		load_campaigns_chart();
-		load_territory_sales_chart();
-		load_lead_source_chart();
+		// 1. All 4 Speedometer Gauge Summary Cards
+		if (data.summary) {
+			render_crm_data(data.summary);
+		}
+
+		// 2. Incoming Leads Chart
+		if (data.incoming_leads) {
+			render_incoming_leads_chart(data.incoming_leads);
+			$('#leads-chart-sync-time').text(__('Last synced just now'));
+		}
+
+		// 3. Opportunity Trends Chart
+		if (data.opportunity_trends) {
+			render_opportunity_trends_chart(data.opportunity_trends);
+			$('#opp-chart-sync-time').text(__('Last synced just now'));
+		}
+
+		// 4. Won Opportunities Chart
+		if (data.won_opportunities) {
+			render_won_opportunities_chart(data.won_opportunities);
+			$('#won-chart-sync-time').text(__('Last synced just now'));
+		}
+
+		// 5. Territory Wise Opportunity Count (Donut)
+		if (data.territory_opportunity) {
+			render_territory_chart(data.territory_opportunity);
+			$('#territory-chart-sync-time').text(__('Last synced just now'));
+		}
+
+		// 6. Opportunities via Campaigns (Pie)
+		if (data.campaigns) {
+			render_campaigns_chart(data.campaigns);
+			$('#campaigns-chart-sync-time').text(__('Last synced just now'));
+		}
+
+		// 7. Territory Wise Sales (Bar)
+		if (data.territory_sales) {
+			render_territory_sales_chart(data.territory_sales);
+			$('#territory-sales-sync-time').text(__('Last synced just now'));
+		}
+
+		// 8. Lead Source (Donut)
+		if (data.lead_source) {
+			render_lead_source_chart(data.lead_source);
+			$('#lead-source-sync-time').text(__('Last synced just now'));
+		}
 	}
 
-	// Show Live indicator in page header
-	page.set_indicator(__('Live'), 'green');
+	// Fetch all dashboard data once on initial mount
+	function load_crm_data() {
+		frappe.call({
+			method: 'erp_dashboards.erp_dashboards.page.g2_crm_dashboard.g2_crm_dashboard.get_all_dashboard_data',
+			callback: function(r) {
+				if (r && r.message) {
+					render_all_dashboard_data(r.message);
+				}
+			}
+		});
+	}
 
-	// Initial real data fetch on page load
+	// Initial data fetch on page load
 	load_crm_data();
 
-	// Secondary action: Refresh real data
+	// Secondary action: Refresh data via WebSocket stream
 	page.set_secondary_action(__('Refresh'), function() {
-		load_crm_data();
+		frappe.call({
+			method: 'erp_dashboards.erp_dashboards.page.g2_crm_dashboard.g2_crm_dashboard.stream_crm_dashboard',
+			callback: function(r) {
+				if (r && r.message) {
+					render_all_dashboard_data(r.message);
+				}
+			}
+		});
 	}, 'refresh');
 
-	// Chart filter change handlers
+	// Chart filter change handlers (user-initiated adjustments only)
 	$(page.main).on('change', '#select-chart-timespan, #select-chart-interval', function() {
 		load_incoming_leads_chart();
 	});
@@ -952,42 +995,11 @@ frappe.pages['g2-crm-dashboard'].on_page_load = function(wrapper) {
 	});
 
 	// --- REAL-TIME WEBSOCKET ENGINE ---
-	// Listen to real-time events via Frappe WebSockets (Socket.IO).
-	// Zero HTTP requests: receives updated summary and charts directly over WebSocket.
+	// All summary metrics and charts are pushed directly via WebSockets (Socket.IO).
+	// Zero HTTP polling: DOM updates immediately from the WebSocket payload.
 	frappe.realtime.on('crm_dashboard_update', function(data) {
-		if (data && data.summary) {
-			render_crm_data(data.summary);
-
-			if (data.leads_chart) {
-				render_incoming_leads_chart(data.leads_chart);
-				$('#leads-chart-sync-time').text(__('Live via WebSocket'));
-			}
-			if (data.lead_source_chart) {
-				render_lead_source_chart(data.lead_source_chart);
-				$('#lead-source-sync-time').text(__('Live via WebSocket'));
-			}
-			if (data.opp_trends_chart) {
-				render_opportunity_trends_chart(data.opp_trends_chart);
-				$('#opp-chart-sync-time').text(__('Live via WebSocket'));
-			}
-			if (data.won_opp_chart) {
-				render_won_opportunities_chart(data.won_opp_chart);
-				$('#won-chart-sync-time').text(__('Live via WebSocket'));
-			}
-			if (data.territory_chart) {
-				render_territory_chart(data.territory_chart);
-				$('#territory-chart-sync-time').text(__('Live via WebSocket'));
-			}
-			if (data.campaigns_chart) {
-				render_campaigns_chart(data.campaigns_chart);
-				$('#campaigns-chart-sync-time').text(__('Live via WebSocket'));
-			}
-			if (data.territory_sales_chart) {
-				render_territory_sales_chart(data.territory_sales_chart);
-				$('#territory-sales-sync-time').text(__('Live via WebSocket'));
-			}
-		} else {
-			load_crm_data();
+		if (data) {
+			render_all_dashboard_data(data);
 		}
 	});
 
