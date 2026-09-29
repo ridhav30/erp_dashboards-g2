@@ -186,4 +186,47 @@
 			</div>
 		</div>
 	</div>
+
+	<!-- Incoming Leads Chart Card (Matching standard ERPNext CRM Incoming Leads) -->
+	<div class="crm-chart-card" id="card-incoming-leads">
+		<div class="crm-chart-header">
+			<div class="crm-chart-title-group">
+				<span class="crm-chart-title">Incoming Leads</span>
+				<span class="crm-chart-subtitle" id="leads-chart-sync-time">Last synced just now</span>
+			</div>
+			<div class="crm-chart-actions">
+				<button class="crm-chart-btn" id="btn-chart-refresh" title="Filter / Refresh">
+					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+					</svg>
+				</button>
+				<div class="crm-chart-select-wrapper">
+					<select class="crm-chart-select" id="select-chart-timespan">
+						<option value="Last Month">Last Month</option>
+						<option value="Last Quarter" selected>Last Quarter</option>
+						<option value="Last Year">Last Year</option>
+					</select>
+				</div>
+				<div class="crm-chart-select-wrapper">
+					<select class="crm-chart-select" id="select-chart-interval">
+						<option value="Daily">Daily</option>
+						<option value="Weekly" selected>Weekly</option>
+						<option value="Monthly">Monthly</option>
+					</select>
+				</div>
+				<button class="crm-chart-btn" id="btn-chart-menu" title="Options">
+					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<circle cx="12" cy="12" r="1.5"></circle>
+						<circle cx="19" cy="12" r="1.5"></circle>
+						<circle cx="5" cy="12" r="1.5"></circle>
+					</svg>
+				</button>
+			</div>
+		</div>
+		<div class="crm-chart-body" id="incoming-leads-chart-wrapper">
+			<div class="crm-chart-loading">
+				<span style="font-size: 13px; color: #94a3b8;">Loading Incoming Leads chart...</span>
+			</div>
+		</div>
+	</div>
 </div>

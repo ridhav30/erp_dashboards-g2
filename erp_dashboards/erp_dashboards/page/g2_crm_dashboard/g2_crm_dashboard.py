@@ -118,3 +118,100 @@ def on_crm_doc_change(doc=None, method=None):
 	except Exception:
 		pass
 
+
+@frappe.whitelist()
+def get_incoming_leads_chart(timespan="Last Quarter", time_interval="Weekly"):
+	"""
+	Fetch chart data for Incoming Leads.
+	First checks standard Frappe Dashboard Chart 'Incoming Leads'.
+	If not found, aggregates directly from tabLead by the requested timespan and frequency.
+	"""
+	# 1. Try standard Frappe Dashboard Chart get
+	if frappe.db.exists("Dashboard Chart", "Incoming Leads"):
+		try:
+			from frappe.desk.doctype.dashboard_chart.dashboard_chart import get
+			res = get(chart_name="Incoming Leads", timespan=timespan, time_interval=time_interval, refresh=1)
+			if res and res.get("labels") and res.get("datasets"):
+				return res
+		except Exception as e:
+			frappe.log_error("Incoming Leads Dashboard Chart Error", str(e))
+
+	# 2. Direct aggregation fallback from tabLead
+	from frappe.utils import add_days, getdate, nowdate
+	from datetime import timedelta
+	from collections import OrderedDict
+
+	today = getdate(nowdate())
+	if timespan == "Last Month":
+		start_date = add_days(today, -30)
+		step_days = 7 if time_interval == "Weekly" else (1 if time_interval == "Daily" else 30)
+	elif timespan == "Last Year":
+		start_date = add_days(today, -365)
+		step_days = 30 if time_interval == "Monthly" else (7 if time_interval == "Weekly" else 1)
+	else:  # Last Quarter (default)
+		start_date = add_days(today, -91)
+		step_days = 7 if time_interval == "Weekly" else (1 if time_interval == "Daily" else 30)
+
+	leads = frappe.db.sql(
+		"""
+		SELECT creation
+		FROM `tabLead`
+		WHERE creation >= %s
+		ORDER BY creation ASC
+		""",
+		(start_date,),
+		as_dict=True,
+	)
+
+	# If no recent leads found in current calendar timespan, look at latest available leads in system
+	if not leads:
+		leads = frappe.db.sql(
+			"""
+			SELECT creation
+			FROM `tabLead`
+			ORDER BY creation ASC
+			LIMIT 500
+			""",
+			as_dict=True,
+		)
+		if leads:
+			start_date = getdate(leads[0].creation)
+			today = getdate(leads[-1].creation)
+			if (today - start_date).days < 14:
+				start_date = add_days(today, -91)
+
+	# Generate clean interval date buckets
+	current = start_date
+	buckets = OrderedDict()
+	delta = timedelta(days=step_days)
+
+	while current <= today + timedelta(days=step_days):
+		label = current.strftime("%d-%m-%Y")
+		buckets[label] = {
+			"start": current,
+			"end": current + delta,
+			"count": 0,
+		}
+		current += delta
+
+	for lead in leads:
+		dt = getdate(lead.creation)
+		for label, b in buckets.items():
+			if b["start"] <= dt < b["end"]:
+				b["count"] += 1
+				break
+
+	labels = list(buckets.keys())
+	values = [b["count"] for b in buckets.values()]
+
+	return {
+		"labels": labels,
+		"datasets": [
+			{
+				"name": "Incoming Leads",
+				"values": values,
+			}
+		],
+	}
+
+
