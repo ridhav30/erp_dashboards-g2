@@ -1,6 +1,189 @@
 <div class="g2-crm-dashboard">
-	<!-- CRM Dashboard Content Container -->
-	<div class="crm-dashboard-content">
-		<h1>hello</h1>
+	<!-- Speedometer Metric Grid -->
+	<div class="dashboard-rpm-grid">
+		<!-- 1. New Lead (Last 1 Month) -->
+		<div class="rpm-card" id="card-new-leads">
+			<div class="rpm-card-header">
+				<span class="rpm-card-title">NEW LEAD (LAST 1 MONTH)</span>
+				<span class="rpm-badge leads">1 Month</span>
+			</div>
+
+			<!-- Speedometer Gauge (Clean 180° Upper Arch - No Bottom Arch) -->
+			<div class="speedometer-container">
+				<svg class="speedometer-svg" viewBox="0 0 200 120">
+					<defs>
+						<linearGradient id="grad-leads" x1="0%" y1="0%" x2="100%" y2="0%">
+							<stop offset="0%" stop-color="#0284c7" />
+							<stop offset="100%" stop-color="#10b981" />
+						</linearGradient>
+					</defs>
+					<!-- Background Track Arc -->
+					<path class="gauge-bg-arc" d="M 25 100 A 75 75 0 0 1 175 100" />
+					<!-- Active Value Arc -->
+					<path class="gauge-val-arc arc-new-leads" d="M 25 100 A 75 75 0 0 1 175 100" stroke="url(#grad-leads)" />
+					<!-- Tick Marks -->
+					<line x1="25" y1="100" x2="33" y2="100" class="gauge-tick" />
+					<line x1="47" y1="47" x2="53" y2="53" class="gauge-tick" />
+					<line x1="100" y1="25" x2="100" y2="33" class="gauge-tick" />
+					<line x1="153" y1="47" x2="147" y2="53" class="gauge-tick" />
+					<line x1="175" y1="100" x2="167" y2="100" class="gauge-tick" />
+					<!-- Needle -->
+					<g class="gauge-needle-group needle-new-leads" style="transform: rotate(-90deg);">
+						<polygon points="97,100 100,28 103,100 100,105" class="gauge-needle needle-sky" />
+						<circle cx="100" cy="100" r="7" class="gauge-pivot-outer" />
+						<circle cx="100" cy="100" r="3.5" class="gauge-pivot-inner" />
+					</g>
+				</svg>
+				<div class="gauge-scale-labels">
+					<span class="scale-min">0</span>
+					<span class="scale-max" id="max-new-leads">100K</span>
+				</div>
+			</div>
+
+			<div class="kpi-card-body">
+				<div class="kpi-value-wrapper">
+					<span class="kpi-value" id="count-new-leads">0</span>
+					<span class="kpi-currency">LEADS</span>
+				</div>
+			</div>
+			<div class="kpi-card-footer">
+				<span class="kpi-subtext">New leads in last 30 days</span>
+			</div>
+		</div>
+
+		<!-- 2. New Opportunity (Last 1 Month) -->
+		<div class="rpm-card" id="card-new-opportunities">
+			<div class="rpm-card-header">
+				<span class="rpm-card-title">NEW OPPORTUNITY (LAST 1 MONTH)</span>
+				<span class="rpm-badge opp">1 Month</span>
+			</div>
+
+			<div class="speedometer-container">
+				<svg class="speedometer-svg" viewBox="0 0 200 120">
+					<defs>
+						<linearGradient id="grad-opportunities" x1="0%" y1="0%" x2="100%" y2="0%">
+							<stop offset="0%" stop-color="#3b82f6" />
+							<stop offset="100%" stop-color="#8b5cf6" />
+						</linearGradient>
+					</defs>
+					<path class="gauge-bg-arc" d="M 25 100 A 75 75 0 0 1 175 100" />
+					<path class="gauge-val-arc arc-new-opportunities" d="M 25 100 A 75 75 0 0 1 175 100" stroke="url(#grad-opportunities)" />
+					<line x1="25" y1="100" x2="33" y2="100" class="gauge-tick" />
+					<line x1="47" y1="47" x2="53" y2="53" class="gauge-tick" />
+					<line x1="100" y1="25" x2="100" y2="33" class="gauge-tick" />
+					<line x1="153" y1="47" x2="147" y2="53" class="gauge-tick" />
+					<line x1="175" y1="100" x2="167" y2="100" class="gauge-tick" />
+					<g class="gauge-needle-group needle-new-opportunities" style="transform: rotate(-90deg);">
+						<polygon points="97,100 100,28 103,100 100,105" class="gauge-needle needle-purple" />
+						<circle cx="100" cy="100" r="7" class="gauge-pivot-outer" />
+						<circle cx="100" cy="100" r="3.5" class="gauge-pivot-inner" />
+					</g>
+				</svg>
+				<div class="gauge-scale-labels">
+					<span class="scale-min">0</span>
+					<span class="scale-max" id="max-new-opportunities">100K</span>
+				</div>
+			</div>
+
+			<div class="kpi-card-body">
+				<div class="kpi-value-wrapper">
+					<span class="kpi-value" id="count-new-opportunities">0</span>
+					<span class="kpi-currency">DEALS</span>
+				</div>
+			</div>
+			<div class="kpi-card-footer">
+				<span class="kpi-subtext">New opportunities in last 30 days</span>
+			</div>
+		</div>
+
+		<!-- 3. Won Opportunity (Last 1 Month) -->
+		<div class="rpm-card" id="card-won-opportunities">
+			<div class="rpm-card-header">
+				<span class="rpm-card-title">WON OPPORTUNITY (LAST 1 MONTH)</span>
+				<span class="rpm-badge cust">Won</span>
+			</div>
+
+			<div class="speedometer-container">
+				<svg class="speedometer-svg" viewBox="0 0 200 120">
+					<defs>
+						<linearGradient id="grad-customers" x1="0%" y1="0%" x2="100%" y2="0%">
+							<stop offset="0%" stop-color="#10b981" />
+							<stop offset="100%" stop-color="#059669" />
+						</linearGradient>
+					</defs>
+					<path class="gauge-bg-arc" d="M 25 100 A 75 75 0 0 1 175 100" />
+					<path class="gauge-val-arc arc-won-opportunities" d="M 25 100 A 75 75 0 0 1 175 100" stroke="url(#grad-customers)" />
+					<line x1="25" y1="100" x2="33" y2="100" class="gauge-tick" />
+					<line x1="47" y1="47" x2="53" y2="53" class="gauge-tick" />
+					<line x1="100" y1="25" x2="100" y2="33" class="gauge-tick" />
+					<line x1="153" y1="47" x2="147" y2="53" class="gauge-tick" />
+					<line x1="175" y1="100" x2="167" y2="100" class="gauge-tick" />
+					<g class="gauge-needle-group needle-won-opportunities" style="transform: rotate(-90deg);">
+						<polygon points="97,100 100,28 103,100 100,105" class="gauge-needle needle-emerald" />
+						<circle cx="100" cy="100" r="7" class="gauge-pivot-outer" />
+						<circle cx="100" cy="100" r="3.5" class="gauge-pivot-inner" />
+					</g>
+				</svg>
+				<div class="gauge-scale-labels">
+					<span class="scale-min">0</span>
+					<span class="scale-max" id="max-won-opportunities">100K</span>
+				</div>
+			</div>
+
+			<div class="kpi-card-body">
+				<div class="kpi-value-wrapper">
+					<span class="kpi-value" id="count-won-opportunities">0</span>
+					<span class="kpi-currency">WON</span>
+				</div>
+			</div>
+			<div class="kpi-card-footer">
+				<span class="kpi-subtext">Converted opportunities in last 30 days</span>
+			</div>
+		</div>
+
+		<!-- 4. Open Opportunity -->
+		<div class="rpm-card" id="card-open-opportunities">
+			<div class="rpm-card-header">
+				<span class="rpm-card-title">OPEN OPPORTUNITY</span>
+				<span class="rpm-badge quote">Open</span>
+			</div>
+
+			<div class="speedometer-container">
+				<svg class="speedometer-svg" viewBox="0 0 200 120">
+					<defs>
+						<linearGradient id="grad-quotations" x1="0%" y1="0%" x2="100%" y2="0%">
+							<stop offset="0%" stop-color="#f59e0b" />
+							<stop offset="100%" stop-color="#ef4444" />
+						</linearGradient>
+					</defs>
+					<path class="gauge-bg-arc" d="M 25 100 A 75 75 0 0 1 175 100" />
+					<path class="gauge-val-arc arc-open-opportunities" d="M 25 100 A 75 75 0 0 1 175 100" stroke="url(#grad-quotations)" />
+					<line x1="25" y1="100" x2="33" y2="100" class="gauge-tick" />
+					<line x1="47" y1="47" x2="53" y2="53" class="gauge-tick" />
+					<line x1="100" y1="25" x2="100" y2="33" class="gauge-tick" />
+					<line x1="153" y1="47" x2="147" y2="53" class="gauge-tick" />
+					<line x1="175" y1="100" x2="167" y2="100" class="gauge-tick" />
+					<g class="gauge-needle-group needle-open-opportunities" style="transform: rotate(-90deg);">
+						<polygon points="97,100 100,28 103,100 100,105" class="gauge-needle needle-orange" />
+						<circle cx="100" cy="100" r="7" class="gauge-pivot-outer" />
+						<circle cx="100" cy="100" r="3.5" class="gauge-pivot-inner" />
+					</g>
+				</svg>
+				<div class="gauge-scale-labels">
+					<span class="scale-min">0</span>
+					<span class="scale-max" id="max-open-opportunities">100K</span>
+				</div>
+			</div>
+
+			<div class="kpi-card-body">
+				<div class="kpi-value-wrapper">
+					<span class="kpi-value" id="count-open-opportunities">0</span>
+					<span class="kpi-currency">ACTIVE</span>
+				</div>
+			</div>
+			<div class="kpi-card-footer">
+				<span class="kpi-subtext">Active pipeline opportunities</span>
+			</div>
+		</div>
 	</div>
 </div>
