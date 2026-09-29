@@ -1,0 +1,67 @@
+/* ==========================================================================
+   Full Width Page Layout - G2 CRM Dashboard
+   Aligns body content to the exact X-level of the breadcrumb home icon
+   ========================================================================== */
+
+/* 1. Reset page-level max-width variables */
+[data-page-route="g2-crm-dashboard"],
+#page-g2-crm-dashboard,
+.full-width-page {
+	--page-max-width: 100% !important;
+}
+
+/* 2. Container full-width overrides with consistent horizontal alignment */
+[data-page-route="g2-crm-dashboard"] .page-head .container,
+[data-page-route="g2-crm-dashboard"] .container.page-body,
+[data-page-route="g2-crm-dashboard"] .page-body.container,
+[data-page-route="g2-crm-dashboard"] .page-body .container,
+#page-g2-crm-dashboard .page-head .container,
+#page-g2-crm-dashboard .container.page-body,
+#page-g2-crm-dashboard .page-body.container,
+#page-g2-crm-dashboard .page-body .container {
+	max-width: 100% !important;
+	width: 100% !important;
+	margin-left: 0 !important;
+	margin-right: 0 !important;
+	padding-left: var(--padding-md, 15px) !important;
+	padding-right: var(--padding-md, 15px) !important;
+	box-sizing: border-box !important;
+}
+
+/* 3. Strip nested padding and margins from intermediate body containers
+      so the content starts at the exact X-level of the breadcrumb home icon */
+[data-page-route="g2-crm-dashboard"] .page-wrapper,
+[data-page-route="g2-crm-dashboard"] .page-content,
+[data-page-route="g2-crm-dashboard"] .layout-main,
+[data-page-route="g2-crm-dashboard"] .layout-main-section-wrapper,
+[data-page-route="g2-crm-dashboard"] .layout-main-section,
+[data-page-route="g2-crm-dashboard"] .page-main,
+#page-g2-crm-dashboard .page-wrapper,
+#page-g2-crm-dashboard .page-content,
+#page-g2-crm-dashboard .layout-main,
+#page-g2-crm-dashboard .layout-main-section-wrapper,
+#page-g2-crm-dashboard .layout-main-section,
+#page-g2-crm-dashboard .page-main {
+	max-width: 100% !important;
+	width: 100% !important;
+	margin-left: 0 !important;
+	margin-right: 0 !important;
+	padding-left: 0 !important;
+	padding-right: 0 !important;
+	border: none !important;
+	box-shadow: none !important;
+	box-sizing: border-box !important;
+}
+
+/* 4. CRM Dashboard root container */
+.g2-crm-dashboard {
+	width: 100% !important;
+	min-height: calc(100vh - 120px);
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	padding: 12px 0 40px 0;
+	margin-left: 0 !important;
+	margin-right: 0 !important;
+	box-sizing: border-box !important;
+}
