@@ -5,12 +5,17 @@ from frappe.utils import add_months, nowdate
 @frappe.whitelist()
 def get_crm_summary():
 	"""
-	Fetch exact real-world CRM counts matching standard ERPNext CRM Number Cards:
-	1. New Lead (Last 1 Month)
-	2. New Opportunity (Last 1 Month)
-	3. Won Opportunity (Last 1 Month)
-	4. Open Opportunity
+	Fetch exact real-world CRM counts directly from the database for the rolling 30-day window:
+	1. New Lead (Last 1 Month / 30 Days) - counts any lead created in the last 30 days
+	2. New Opportunity (Last 1 Month / 30 Days) - counts any opportunity created in the last 30 days
+	3. Won Opportunity (Last 1 Month / 30 Days) - counts converted/won opportunities in the last 30 days
+	4. Open Opportunity - counts active pipeline opportunities
 	"""
+	from frappe.utils import add_days, nowdate
+
+	# Rolling 30 days from today (e.g., if today is 2026-09-29, thirty_days_ago is 2026-08-30)
+	thirty_days_ago = add_days(nowdate(), -30)
+
 	summary = {
 		"new_leads": 0,
 		"new_opportunities": 0,
@@ -18,103 +23,81 @@ def get_crm_summary():
 		"open_opportunities": 0,
 	}
 
-	card_mapping = {
-		"new_leads": ["New Lead (Last 1 Month)", "New Leads (Last 1 Month)", "New Leads"],
-		"new_opportunities": ["New Opportunity (Last 1 Month)", "New Opportunities (Last 1 Month)", "New Opportunities"],
-		"won_opportunities": ["Won Opportunity (Last 1 Month)", "Won Opportunities (Last 1 Month)", "Won Opportunities"],
-		"open_opportunities": ["Open Opportunity", "Open Opportunities", "Active Opportunities"],
-	}
-
-	one_month_ago = add_months(nowdate(), -1)
-
-	for key, card_names in card_mapping.items():
-		fetched = False
-
-		# 1. Fetch from standard ERPNext Number Card doctype
-		for card_name in card_names:
-			if fetched:
-				break
-			if not frappe.db.exists("Number Card", card_name):
-				continue
-
-			# Try calling Frappe get_result
-			try:
-				from frappe.desk.doctype.number_card.number_card import get_result
-				card_doc = frappe.get_doc("Number Card", card_name)
-				for arg in [
-					{"doc": card_doc.as_dict()},
-					{"name": card_name},
-					card_doc.as_dict(),
-				]:
-					try:
-						res = get_result(arg)
-						if res is not None:
-							val = res.get("value") if isinstance(res, dict) else res
-							summary[key] = int(round(float(val)))
-							fetched = True
-							break
-					except Exception:
-						continue
-			except Exception:
-				pass
-
-			# Direct count using Number Card's exact filters_json
-			if not fetched:
-				try:
-					card_doc = frappe.get_doc("Number Card", card_name)
-					filters = frappe.parse_json(card_doc.filters_json) if card_doc.filters_json else []
-					summary[key] = frappe.db.count(card_doc.document_type, filters=filters)
-					fetched = True
-				except Exception:
-					pass
-
-		if fetched:
-			continue
-
-		# 2. Fallback to direct database counts with standard ERPNext CRM filters
+	# 1. New Leads (Last 30 Days): Query directly from tabLead for real-time accuracy
+	if frappe.db.table_exists("Lead"):
 		try:
-			if key == "new_leads" and frappe.db.table_exists("Lead"):
-				cnt = frappe.db.count("Lead", filters={"creation": [">=", one_month_ago]})
-				if cnt == 0:
-					cnt = frappe.db.count("Lead")
-				summary[key] = cnt
-
-			elif key == "new_opportunities" and frappe.db.table_exists("Opportunity"):
-				cnt = frappe.db.count("Opportunity", filters={"creation": [">=", one_month_ago]})
-				if cnt == 0:
-					cnt = frappe.db.count("Opportunity")
-				summary[key] = cnt
-
-			elif key == "won_opportunities" and frappe.db.table_exists("Opportunity"):
-				cnt = frappe.db.count(
-					"Opportunity",
-					filters=[
-						["Opportunity", "status", "in", ["Converted", "Closed", "Won"]],
-						["Opportunity", "modified", ">=", one_month_ago],
-					],
-				)
-				if cnt == 0:
-					cnt = frappe.db.count("Opportunity", filters={"status": ["in", ["Converted", "Closed", "Won"]]})
-				summary[key] = cnt
-
-			elif key == "open_opportunities" and frappe.db.table_exists("Opportunity"):
-				cnt = frappe.db.count("Opportunity", filters={"status": "Open"})
-				if cnt == 0:
-					cnt = frappe.db.count("Opportunity", filters={"status": ["in", ["Open", "Quotation", "Draft"]]})
-				summary[key] = cnt
-
+			res = frappe.db.sql(
+				"""
+				SELECT COUNT(name)
+				FROM `tabLead`
+				WHERE docstatus < 2
+				  AND creation >= %s
+				""",
+				(thirty_days_ago,),
+			)
+			summary["new_leads"] = int(res[0][0]) if res and res[0][0] is not None else 0
 		except Exception as e:
-			frappe.log_error(f"CRM Dashboard {key} Error", str(e))
+			frappe.log_error("CRM Summary new_leads Error", str(e))
+
+	# 2. New Opportunities (Last 30 Days): Query directly from tabOpportunity
+	if frappe.db.table_exists("Opportunity"):
+		try:
+			res = frappe.db.sql(
+				"""
+				SELECT COUNT(name)
+				FROM `tabOpportunity`
+				WHERE docstatus < 2
+				  AND creation >= %s
+				""",
+				(thirty_days_ago,),
+			)
+			summary["new_opportunities"] = int(res[0][0]) if res and res[0][0] is not None else 0
+		except Exception as e:
+			frappe.log_error("CRM Summary new_opportunities Error", str(e))
+
+	# 3. Won Opportunities (Last 30 Days): Converted or Won opportunities in last 30 days
+	if frappe.db.table_exists("Opportunity"):
+		try:
+			res = frappe.db.sql(
+				"""
+				SELECT COUNT(name)
+				FROM `tabOpportunity`
+				WHERE docstatus < 2
+				  AND status IN ('Converted', 'Closed', 'Won')
+				  AND (modified >= %s OR creation >= %s)
+				""",
+				(thirty_days_ago, thirty_days_ago),
+			)
+			summary["won_opportunities"] = int(res[0][0]) if res and res[0][0] is not None else 0
+		except Exception as e:
+			frappe.log_error("CRM Summary won_opportunities Error", str(e))
+
+	# 4. Open Opportunities: Active pipeline opportunities
+	if frappe.db.table_exists("Opportunity"):
+		try:
+			res = frappe.db.sql(
+				"""
+				SELECT COUNT(name)
+				FROM `tabOpportunity`
+				WHERE docstatus < 2
+				  AND status NOT IN ('Converted', 'Closed', 'Lost')
+				""",
+			)
+			summary["open_opportunities"] = int(res[0][0]) if res and res[0][0] is not None else 0
+		except Exception as e:
+			frappe.log_error("CRM Summary open_opportunities Error", str(e))
 
 	return summary
 
 
 def on_crm_doc_change(doc=None, method=None):
 	"""
-	Publish real-time event via Frappe WebSocket whenever Lead or Opportunity changes.
+	Publish real-time event via Frappe WebSocket whenever Lead, Opportunity, or Sales Order/Invoice changes.
+	after_commit=True ensures that the database transaction has committed before the browser is notified,
+	so the new record is immediately visible to get_crm_summary().
 	"""
 	try:
-		frappe.publish_realtime("crm_dashboard_update")
+		frappe.publish_realtime("crm_dashboard_update", after_commit=True)
 	except Exception:
 		pass
 

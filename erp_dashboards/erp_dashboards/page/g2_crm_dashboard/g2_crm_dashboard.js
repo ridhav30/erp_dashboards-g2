@@ -943,40 +943,12 @@ frappe.pages['g2-crm-dashboard'].on_page_load = function(wrapper) {
 		load_incoming_leads_chart();
 	});
 
-	$(page.main).on('click', '#btn-chart-refresh', function() {
-		load_incoming_leads_chart();
-	});
-
 	$(page.main).on('change', '#select-opp-chart-timespan, #select-opp-chart-interval', function() {
-		load_opportunity_trends_chart();
-	});
-
-	$(page.main).on('click', '#btn-opp-chart-refresh', function() {
 		load_opportunity_trends_chart();
 	});
 
 	$(page.main).on('change', '#select-won-chart-timespan, #select-won-chart-interval', function() {
 		load_won_opportunities_chart();
-	});
-
-	$(page.main).on('click', '#btn-won-chart-refresh', function() {
-		load_won_opportunities_chart();
-	});
-
-	$(page.main).on('click', '#btn-territory-refresh', function() {
-		load_territory_chart();
-	});
-
-	$(page.main).on('click', '#btn-campaigns-refresh', function() {
-		load_campaigns_chart();
-	});
-
-	$(page.main).on('click', '#btn-territory-sales-refresh', function() {
-		load_territory_sales_chart();
-	});
-
-	$(page.main).on('click', '#btn-lead-source-refresh', function() {
-		load_lead_source_chart();
 	});
 
 	// --- REAL-TIME ENGINE ---
@@ -986,6 +958,12 @@ frappe.pages['g2-crm-dashboard'].on_page_load = function(wrapper) {
 	});
 
 	frappe.realtime.on('doc_update', function(data) {
+		if (data && (data.doctype === 'Lead' || data.doctype === 'Opportunity' || data.doctype === 'Sales Order' || data.doctype === 'Sales Invoice')) {
+			load_crm_data();
+		}
+	});
+
+	frappe.realtime.on('list_update', function(data) {
 		if (data && (data.doctype === 'Lead' || data.doctype === 'Opportunity' || data.doctype === 'Sales Order' || data.doctype === 'Sales Invoice')) {
 			load_crm_data();
 		}
@@ -1011,16 +989,11 @@ frappe.pages['g2-crm-dashboard'].on_page_load = function(wrapper) {
 	wrapper.addEventListener('remove', function() {
 		clearInterval(live_timer);
 		frappe.realtime.off('crm_dashboard_update');
+		frappe.realtime.off('doc_update');
+		frappe.realtime.off('list_update');
 		$(window).off('focus.crm_dashboard');
 		$(page.main).off('change', '#select-chart-timespan, #select-chart-interval');
-		$(page.main).off('click', '#btn-chart-refresh');
 		$(page.main).off('change', '#select-opp-chart-timespan, #select-opp-chart-interval');
-		$(page.main).off('click', '#btn-opp-chart-refresh');
 		$(page.main).off('change', '#select-won-chart-timespan, #select-won-chart-interval');
-		$(page.main).off('click', '#btn-won-chart-refresh');
-		$(page.main).off('click', '#btn-territory-refresh');
-		$(page.main).off('click', '#btn-campaigns-refresh');
-		$(page.main).off('click', '#btn-territory-sales-refresh');
-		$(page.main).off('click', '#btn-lead-source-refresh');
 	});
 };
