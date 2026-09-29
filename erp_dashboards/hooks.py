@@ -155,6 +155,16 @@ doc_events = {
 		"after_insert": "erp_dashboards.erp_dashboards.page.g2_crm_dashboard.g2_crm_dashboard.on_crm_doc_change",
 		"on_trash": "erp_dashboards.erp_dashboards.page.g2_crm_dashboard.g2_crm_dashboard.on_crm_doc_change",
 	},
+	"Sales Order": {
+		"on_update": "erp_dashboards.erp_dashboards.page.g2_crm_dashboard.g2_crm_dashboard.on_crm_doc_change",
+		"after_insert": "erp_dashboards.erp_dashboards.page.g2_crm_dashboard.g2_crm_dashboard.on_crm_doc_change",
+		"on_trash": "erp_dashboards.erp_dashboards.page.g2_crm_dashboard.g2_crm_dashboard.on_crm_doc_change",
+	},
+	"Sales Invoice": {
+		"on_update": "erp_dashboards.erp_dashboards.page.g2_crm_dashboard.g2_crm_dashboard.on_crm_doc_change",
+		"after_insert": "erp_dashboards.erp_dashboards.page.g2_crm_dashboard.g2_crm_dashboard.on_crm_doc_change",
+		"on_trash": "erp_dashboards.erp_dashboards.page.g2_crm_dashboard.g2_crm_dashboard.on_crm_doc_change",
+	},
 }
 
 # Scheduled Tasks

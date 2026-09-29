@@ -376,4 +376,64 @@
 			</div>
 		</div>
 	</div>
+
+	<!-- Territory Wise Sales Chart Card (Matching standard ERPNext CRM Territory Wise Sales) -->
+	<div class="crm-chart-card" id="card-territory-sales-chart">
+		<div class="crm-chart-header">
+			<div class="crm-chart-title-group">
+				<span class="crm-chart-title">Territory Wise Sales</span>
+				<span class="crm-chart-subtitle" id="territory-sales-sync-time">Last synced just now</span>
+			</div>
+			<div class="crm-chart-actions">
+				<button class="crm-chart-btn" id="btn-territory-sales-refresh" title="Filter / Refresh">
+					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+					</svg>
+				</button>
+				<button class="crm-chart-btn" title="Options">
+					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<circle cx="12" cy="12" r="1.5"></circle>
+						<circle cx="19" cy="12" r="1.5"></circle>
+						<circle cx="5" cy="12" r="1.5"></circle>
+					</svg>
+				</button>
+			</div>
+		</div>
+		<div class="crm-chart-body" id="territory-sales-chart-wrapper">
+			<div class="crm-chart-loading">
+				<span style="font-size: 13px; color: #94a3b8;">Loading territory sales chart...</span>
+			</div>
+		</div>
+	</div>
+
+	<!-- Row with Lead Source Chart Card (Matching standard ERPNext CRM Lead Source) -->
+	<div class="crm-charts-2col-grid">
+		<div class="crm-chart-card half-width" id="card-lead-source-chart">
+			<div class="crm-chart-header">
+				<div class="crm-chart-title-group">
+					<span class="crm-chart-title">Lead Source</span>
+					<span class="crm-chart-subtitle" id="lead-source-sync-time">Last synced just now</span>
+				</div>
+				<div class="crm-chart-actions">
+					<button class="crm-chart-btn" id="btn-lead-source-refresh" title="Filter / Refresh">
+						<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+						</svg>
+					</button>
+					<button class="crm-chart-btn" title="Options">
+						<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<circle cx="12" cy="12" r="1.5"></circle>
+							<circle cx="19" cy="12" r="1.5"></circle>
+							<circle cx="5" cy="12" r="1.5"></circle>
+						</svg>
+					</button>
+				</div>
+			</div>
+			<div class="crm-chart-body" id="lead-source-chart-wrapper">
+				<div class="crm-chart-loading">
+					<span style="font-size: 13px; color: #94a3b8;">Loading lead source chart...</span>
+				</div>
+			</div>
+		</div>
+	</div>
 </div>

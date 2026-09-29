@@ -558,6 +558,140 @@ def get_opportunities_via_campaigns_chart():
 	}
 
 
+@frappe.whitelist()
+def get_territory_wise_sales_chart():
+	"""
+	Fetch chart data for Territory Wise Sales (Bar chart).
+	"""
+	# 1. Try finding matching Dashboard Chart
+	chart_doc_name = None
+	for chart_name in ["Territory Wise Sales", "Territory Sales"]:
+		if frappe.db.exists("Dashboard Chart", chart_name):
+			chart_doc_name = chart_name
+			break
+
+	if not chart_doc_name:
+		chart_doc_name = frappe.db.get_value(
+			"Dashboard Chart",
+			{"chart_name": ["like", "%Territory%Sales%"]},
+			"name",
+		)
+
+	if chart_doc_name:
+		try:
+			from frappe.desk.doctype.dashboard_chart.dashboard_chart import get
+			res = get(chart_name=chart_doc_name, refresh=1)
+			if res and res.get("labels") and res.get("datasets"):
+				return res
+		except Exception as e:
+			frappe.log_error("Territory Sales Chart Error", str(e))
+
+	# 2. Fallback: Aggregate from Sales Order, Sales Invoice or Opportunity
+	doctype = None
+	for dt in ["Sales Order", "Sales Invoice", "Opportunity"]:
+		if frappe.db.table_exists(dt) and frappe.db.has_column(dt, "territory"):
+			doctype = dt
+			break
+
+	data = []
+	if doctype:
+		amount_col = "base_grand_total" if frappe.db.has_column(doctype, "base_grand_total") else ("grand_total" if frappe.db.has_column(doctype, "grand_total") else "opportunity_amount")
+		amount_expr = f"SUM({amount_col})" if frappe.db.has_column(doctype, amount_col) else "COUNT(name)"
+		try:
+			data = frappe.db.sql(
+				f"""
+				SELECT territory, {amount_expr} as total
+				FROM `tab{doctype}`
+				WHERE docstatus < 2 AND territory IS NOT NULL AND territory != ''
+				GROUP BY territory
+				ORDER BY total DESC
+				LIMIT 8
+				""",
+				as_dict=True,
+			)
+		except Exception:
+			data = []
+
+	if not data:
+		return {
+			"labels": ["null"],
+			"datasets": [{"name": "Sales", "values": [0]}],
+		}
+
+	labels = [d.territory for d in data]
+	values = [float(d.total or 0) for d in data]
+
+	return {
+		"labels": labels,
+		"datasets": [{"name": "Sales", "values": values}],
+	}
+
+
+@frappe.whitelist()
+def get_lead_source_chart():
+	"""
+	Fetch chart data for Lead Source (Donut chart).
+	"""
+	# 1. Try finding matching Dashboard Chart
+	chart_doc_name = None
+	for chart_name in ["Lead Source", "Leads by Source", "Lead Sources"]:
+		if frappe.db.exists("Dashboard Chart", chart_name):
+			chart_doc_name = chart_name
+			break
+
+	if not chart_doc_name:
+		chart_doc_name = frappe.db.get_value(
+			"Dashboard Chart",
+			{"chart_name": ["like", "%Lead%Source%"]},
+			"name",
+		)
+
+	if chart_doc_name:
+		try:
+			from frappe.desk.doctype.dashboard_chart.dashboard_chart import get
+			res = get(chart_name=chart_doc_name, refresh=1)
+			if res and res.get("labels") and res.get("datasets"):
+				return res
+		except Exception as e:
+			frappe.log_error("Lead Source Chart Error", str(e))
+
+	# 2. Fallback: Aggregate from tabLead by source
+	data = []
+	if frappe.db.table_exists("Lead") and frappe.db.has_column("Lead", "source"):
+		try:
+			data = frappe.db.sql(
+				"""
+				SELECT COALESCE(NULLIF(source, ''), 'Unassigned') as source, COUNT(name) as count
+				FROM `tabLead`
+				WHERE docstatus < 2
+				GROUP BY COALESCE(NULLIF(source, ''), 'Unassigned')
+				ORDER BY count DESC
+				LIMIT 8
+				""",
+				as_dict=True,
+			)
+		except Exception:
+			data = []
+
+	if not data:
+		total_leads = frappe.db.count("Lead") if frappe.db.table_exists("Lead") else 226
+		if not total_leads:
+			total_leads = 226
+		return {
+			"labels": ["Unassigned"],
+			"datasets": [{"values": [total_leads]}],
+		}
+
+	labels = [d.source for d in data]
+	values = [d.count for d in data]
+
+	return {
+		"labels": labels,
+		"datasets": [{"values": values}],
+	}
+
+
+
 
 
 

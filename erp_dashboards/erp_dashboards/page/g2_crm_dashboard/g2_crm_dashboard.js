@@ -547,7 +547,7 @@ frappe.pages['g2-crm-dashboard'].on_page_load = function(wrapper) {
 
 	function render_svg_donut_chart($wrapper, labels, values) {
 		if (!labels.length || !values.length) {
-			$wrapper.html('<div style="text-align:center; padding: 60px 0; color: #94a3b8; font-size: 13px;">' + __('No territory data available') + '</div>');
+			$wrapper.html('<div style="text-align:center; padding: 60px 0; color: #94a3b8; font-size: 13px;">' + __('No data available') + '</div>');
 			return;
 		}
 
@@ -738,6 +738,170 @@ frappe.pages['g2-crm-dashboard'].on_page_load = function(wrapper) {
 		});
 	}
 
+	// --- TERRITORY WISE SALES CHART ENGINE ---
+	var frappe_territory_sales_chart_instance = null;
+
+	function render_svg_territory_sales_chart($wrapper, labels, values) {
+		var w = 1000;
+		var h = 240;
+		var padLeft = 55;
+		var padRight = 25;
+		var padTop = 25;
+		var padBottom = 45;
+
+		var chartW = w - padLeft - padRight;
+		var chartH = h - padTop - padBottom;
+
+		var maxRaw = Math.max.apply(null, values);
+		if (maxRaw <= 0) maxRaw = 5;
+		var maxY = maxRaw <= 5 ? 5 : Math.ceil(maxRaw);
+
+		var numPoints = labels.length;
+		var baseY = padTop + chartH;
+		var barW = Math.max(16, Math.min(48, (chartW / numPoints) * 0.45));
+
+		// Generate horizontal grid lines
+		var gridLinesHtml = '';
+		var ySteps = [0.2, 0.4, 0.6, 0.8, 1];
+		if (maxY > 5) {
+			ySteps = [0, 0.25, 0.5, 0.75, 1];
+		}
+		ySteps.forEach(function(step) {
+			var yVal = Math.round(maxY * step);
+			var yPos = padTop + chartH - (step * chartH);
+			gridLinesHtml += '<line x1="' + padLeft + '" y1="' + yPos + '" x2="' + (padLeft + chartW) + '" y2="' + yPos + '" class="chart-grid-line" />';
+			gridLinesHtml += '<text x="' + (padLeft - 12) + '" y="' + (yPos + 4) + '" text-anchor="end" class="chart-axis-text">' + yVal + '</text>';
+		});
+
+		// Generate bars and labels
+		var barsHtml = '';
+		var xLabelsHtml = '';
+		var stepSkip = Math.max(1, Math.floor(numPoints / 14));
+
+		for (var i = 0; i < numPoints; i++) {
+			var px = padLeft + (numPoints > 1 ? (i / (numPoints - 1)) * chartW : chartW / 2);
+			var val = values[i] || 0;
+			var barH = maxY > 0 ? (val / maxY) * chartH : 0;
+			var barY = baseY - barH;
+
+			if (val > 0) {
+				barsHtml += '<rect x="' + (px - barW / 2).toFixed(1) + '" y="' + barY.toFixed(1) + '" width="' + barW + '" height="' + barH.toFixed(1) + '" fill="#38bdf8" rx="2" ry="2" class="chart-bar"><title>' + labels[i] + ': ' + val + '</title></rect>';
+			}
+
+			if (i % stepSkip === 0 || i === numPoints - 1) {
+				xLabelsHtml += '<text x="' + px.toFixed(1) + '" y="' + (baseY + 22) + '" text-anchor="middle" class="chart-axis-text">' + labels[i] + '</text>';
+			}
+		}
+
+		var svgHtml = [
+			'<svg class="svg-chart-svg" viewBox="0 0 ' + w + ' ' + h + '">',
+			gridLinesHtml,
+			'<line x1="' + padLeft + '" y1="' + baseY + '" x2="' + (padLeft + chartW) + '" y2="' + baseY + '" class="chart-axis-line" />',
+			barsHtml,
+			xLabelsHtml,
+			'</svg>'
+		].join('');
+
+		$wrapper.html(svgHtml);
+	}
+
+	function render_territory_sales_chart(chart_data) {
+		var $wrapper = $('#territory-sales-chart-wrapper');
+		if (!$wrapper.length || !chart_data) return;
+
+		var labels = chart_data.labels || [];
+		var values = (chart_data.datasets && chart_data.datasets[0]) ? chart_data.datasets[0].values : [];
+
+		$wrapper.empty();
+
+		if (window.frappe && frappe.Chart) {
+			try {
+				frappe_territory_sales_chart_instance = new frappe.Chart($wrapper[0], {
+					title: "",
+					data: {
+						labels: labels,
+						datasets: [{
+							name: __('Sales'),
+							values: values
+						}]
+					},
+					type: 'bar',
+					height: 240,
+					colors: ['#38bdf8'],
+					axisOptions: {
+						xIsSeries: true,
+						shortenYAxisNumbers: 0
+					}
+				});
+				return;
+			} catch (e) {
+				console.warn('frappe.Chart fallback to responsive SVG', e);
+			}
+		}
+
+		render_svg_territory_sales_chart($wrapper, labels, values);
+	}
+
+	function load_territory_sales_chart() {
+		frappe.call({
+			method: 'erp_dashboards.erp_dashboards.page.g2_crm_dashboard.g2_crm_dashboard.get_territory_wise_sales_chart',
+			callback: function(r) {
+				if (r && r.message) {
+					render_territory_sales_chart(r.message);
+					$('#territory-sales-sync-time').text(__('Last synced just now'));
+				}
+			}
+		});
+	}
+
+	// --- LEAD SOURCE CHART ENGINE (DONUT) ---
+	var frappe_lead_source_chart_instance = null;
+
+	function render_lead_source_chart(chart_data) {
+		var $wrapper = $('#lead-source-chart-wrapper');
+		if (!$wrapper.length || !chart_data) return;
+
+		var labels = chart_data.labels || [];
+		var values = (chart_data.datasets && chart_data.datasets[0]) ? chart_data.datasets[0].values : [];
+
+		$wrapper.empty();
+
+		if (window.frappe && frappe.Chart) {
+			try {
+				frappe_lead_source_chart_instance = new frappe.Chart($wrapper[0], {
+					title: "",
+					data: {
+						labels: labels,
+						datasets: [{
+							name: __('Lead Source'),
+							values: values
+						}]
+					},
+					type: 'donut',
+					height: 230,
+					colors: ['#bae6fd', '#93c5fd', '#60a5fa', '#38bdf8', '#818cf8', '#a78bfa']
+				});
+				return;
+			} catch (e) {
+				console.warn('frappe.Chart donut fallback to SVG', e);
+			}
+		}
+
+		render_svg_donut_chart($wrapper, labels, values);
+	}
+
+	function load_lead_source_chart() {
+		frappe.call({
+			method: 'erp_dashboards.erp_dashboards.page.g2_crm_dashboard.g2_crm_dashboard.get_lead_source_chart',
+			callback: function(r) {
+				if (r && r.message) {
+					render_lead_source_chart(r.message);
+					$('#lead-source-sync-time').text(__('Last synced just now'));
+				}
+			}
+		});
+	}
+
 	// Fetch real-world CRM counts from backend
 	function load_crm_data() {
 		frappe.call({
@@ -759,6 +923,8 @@ frappe.pages['g2-crm-dashboard'].on_page_load = function(wrapper) {
 		load_won_opportunities_chart();
 		load_territory_chart();
 		load_campaigns_chart();
+		load_territory_sales_chart();
+		load_lead_source_chart();
 	}
 
 	// Show Live indicator in page header
@@ -805,6 +971,14 @@ frappe.pages['g2-crm-dashboard'].on_page_load = function(wrapper) {
 		load_campaigns_chart();
 	});
 
+	$(page.main).on('click', '#btn-territory-sales-refresh', function() {
+		load_territory_sales_chart();
+	});
+
+	$(page.main).on('click', '#btn-lead-source-refresh', function() {
+		load_lead_source_chart();
+	});
+
 	// --- REAL-TIME ENGINE ---
 	// 1. Listen to real-time events via Frappe WebSockets (Socket.IO)
 	frappe.realtime.on('crm_dashboard_update', function() {
@@ -812,7 +986,7 @@ frappe.pages['g2-crm-dashboard'].on_page_load = function(wrapper) {
 	});
 
 	frappe.realtime.on('doc_update', function(data) {
-		if (data && (data.doctype === 'Lead' || data.doctype === 'Opportunity')) {
+		if (data && (data.doctype === 'Lead' || data.doctype === 'Opportunity' || data.doctype === 'Sales Order' || data.doctype === 'Sales Invoice')) {
 			load_crm_data();
 		}
 	});
@@ -846,5 +1020,7 @@ frappe.pages['g2-crm-dashboard'].on_page_load = function(wrapper) {
 		$(page.main).off('click', '#btn-won-chart-refresh');
 		$(page.main).off('click', '#btn-territory-refresh');
 		$(page.main).off('click', '#btn-campaigns-refresh');
+		$(page.main).off('click', '#btn-territory-sales-refresh');
+		$(page.main).off('click', '#btn-lead-source-refresh');
 	});
 };
