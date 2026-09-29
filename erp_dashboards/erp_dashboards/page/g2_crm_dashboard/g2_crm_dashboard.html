@@ -229,4 +229,151 @@
 			</div>
 		</div>
 	</div>
+
+	<!-- Opportunity Trends Chart Card (Matching standard ERPNext CRM Opportunity Trends) -->
+	<div class="crm-chart-card" id="card-opportunity-trends">
+		<div class="crm-chart-header">
+			<div class="crm-chart-title-group">
+				<span class="crm-chart-title">Opportunity Trends</span>
+				<span class="crm-chart-subtitle" id="opp-chart-sync-time">Last synced just now</span>
+			</div>
+			<div class="crm-chart-actions">
+				<button class="crm-chart-btn" id="btn-opp-chart-refresh" title="Filter / Refresh">
+					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+					</svg>
+				</button>
+				<div class="crm-chart-select-wrapper">
+					<select class="crm-chart-select" id="select-opp-chart-timespan">
+						<option value="Last Month">Last Month</option>
+						<option value="Last Quarter" selected>Last Quarter</option>
+						<option value="Last Year">Last Year</option>
+					</select>
+				</div>
+				<div class="crm-chart-select-wrapper">
+					<select class="crm-chart-select" id="select-opp-chart-interval">
+						<option value="Daily">Daily</option>
+						<option value="Weekly" selected>Weekly</option>
+						<option value="Monthly">Monthly</option>
+					</select>
+				</div>
+				<button class="crm-chart-btn" id="btn-opp-chart-menu" title="Options">
+					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<circle cx="12" cy="12" r="1.5"></circle>
+						<circle cx="19" cy="12" r="1.5"></circle>
+						<circle cx="5" cy="12" r="1.5"></circle>
+					</svg>
+				</button>
+			</div>
+		</div>
+		<div class="crm-chart-body" id="opportunity-trends-chart-wrapper">
+			<div class="crm-chart-loading">
+				<span style="font-size: 13px; color: #94a3b8;">Loading Opportunity Trends chart...</span>
+			</div>
+		</div>
+	</div>
+
+	<!-- Won Opportunities Chart Card (Matching standard ERPNext CRM Won Opportunities) -->
+	<div class="crm-chart-card" id="card-won-opportunities-chart">
+		<div class="crm-chart-header">
+			<div class="crm-chart-title-group">
+				<span class="crm-chart-title">Won Opportunities</span>
+				<span class="crm-chart-subtitle" id="won-chart-sync-time">Last synced just now</span>
+			</div>
+			<div class="crm-chart-actions">
+				<button class="crm-chart-btn" id="btn-won-chart-refresh" title="Filter / Refresh">
+					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+					</svg>
+				</button>
+				<div class="crm-chart-select-wrapper">
+					<select class="crm-chart-select" id="select-won-chart-timespan">
+						<option value="Last Month">Last Month</option>
+						<option value="Last Quarter">Last Quarter</option>
+						<option value="Last Year" selected>Last Year</option>
+					</select>
+				</div>
+				<div class="crm-chart-select-wrapper">
+					<select class="crm-chart-select" id="select-won-chart-interval">
+						<option value="Daily">Daily</option>
+						<option value="Weekly">Weekly</option>
+						<option value="Monthly" selected>Monthly</option>
+					</select>
+				</div>
+				<button class="crm-chart-btn" id="btn-won-chart-menu" title="Options">
+					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<circle cx="12" cy="12" r="1.5"></circle>
+						<circle cx="19" cy="12" r="1.5"></circle>
+						<circle cx="5" cy="12" r="1.5"></circle>
+					</svg>
+				</button>
+			</div>
+		</div>
+		<div class="crm-chart-body" id="won-opportunities-chart-wrapper">
+			<div class="crm-chart-loading">
+				<span style="font-size: 13px; color: #94a3b8;">Loading Won Opportunities chart...</span>
+			</div>
+		</div>
+	</div>
+
+	<!-- 2-Column Row for Territory & Campaigns Charts -->
+	<div class="crm-charts-2col-grid">
+		<!-- 1. Territory Wise Opportunity Count (Donut) -->
+		<div class="crm-chart-card half-width" id="card-territory-chart">
+			<div class="crm-chart-header">
+				<div class="crm-chart-title-group">
+					<span class="crm-chart-title">Territory Wise Opportunity Count</span>
+					<span class="crm-chart-subtitle" id="territory-chart-sync-time">Last synced just now</span>
+				</div>
+				<div class="crm-chart-actions">
+					<button class="crm-chart-btn" id="btn-territory-refresh" title="Filter / Refresh">
+						<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+						</svg>
+					</button>
+					<button class="crm-chart-btn" title="Options">
+						<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<circle cx="12" cy="12" r="1.5"></circle>
+							<circle cx="19" cy="12" r="1.5"></circle>
+							<circle cx="5" cy="12" r="1.5"></circle>
+						</svg>
+					</button>
+				</div>
+			</div>
+			<div class="crm-chart-body" id="territory-chart-wrapper">
+				<div class="crm-chart-loading">
+					<span style="font-size: 13px; color: #94a3b8;">Loading territory chart...</span>
+				</div>
+			</div>
+		</div>
+
+		<!-- 2. Opportunities via Campaigns (Pie) -->
+		<div class="crm-chart-card half-width" id="card-campaigns-chart">
+			<div class="crm-chart-header">
+				<div class="crm-chart-title-group">
+					<span class="crm-chart-title">Opportunities via Campaigns</span>
+					<span class="crm-chart-subtitle" id="campaigns-chart-sync-time">Last synced just now</span>
+				</div>
+				<div class="crm-chart-actions">
+					<button class="crm-chart-btn" id="btn-campaigns-refresh" title="Filter / Refresh">
+						<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+						</svg>
+					</button>
+					<button class="crm-chart-btn" title="Options">
+						<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<circle cx="12" cy="12" r="1.5"></circle>
+							<circle cx="19" cy="12" r="1.5"></circle>
+							<circle cx="5" cy="12" r="1.5"></circle>
+						</svg>
+					</button>
+				</div>
+			</div>
+			<div class="crm-chart-body" id="campaigns-chart-wrapper">
+				<div class="crm-chart-loading">
+					<span style="font-size: 13px; color: #94a3b8;">Loading campaign chart...</span>
+				</div>
+			</div>
+		</div>
+	</div>
 </div>

@@ -215,3 +215,349 @@ def get_incoming_leads_chart(timespan="Last Quarter", time_interval="Weekly"):
 	}
 
 
+@frappe.whitelist()
+def get_opportunity_trends_chart(timespan="Last Quarter", time_interval="Weekly"):
+	"""
+	Fetch chart data for Opportunity Trends.
+	First checks standard Frappe Dashboard Chart 'Opportunity Trends'.
+	If not found, aggregates directly from tabOpportunity.
+	"""
+	# 1. Try standard Frappe Dashboard Chart get
+	for chart_name in ["Opportunity Trends", "Opportunity Trend", "Opportunities"]:
+		if frappe.db.exists("Dashboard Chart", chart_name):
+			try:
+				from frappe.desk.doctype.dashboard_chart.dashboard_chart import get
+				res = get(chart_name=chart_name, timespan=timespan, time_interval=time_interval, refresh=1)
+				if res and res.get("labels") and res.get("datasets"):
+					return res
+			except Exception as e:
+				frappe.log_error("Opportunity Trends Dashboard Chart Error", str(e))
+
+	# 2. Direct aggregation fallback from tabOpportunity
+	from frappe.utils import add_days, getdate, nowdate
+	from datetime import timedelta
+	from collections import OrderedDict
+
+	today = getdate(nowdate())
+	if timespan == "Last Month":
+		start_date = add_days(today, -30)
+		step_days = 7 if time_interval == "Weekly" else (1 if time_interval == "Daily" else 30)
+	elif timespan == "Last Year":
+		start_date = add_days(today, -365)
+		step_days = 30 if time_interval == "Monthly" else (7 if time_interval == "Weekly" else 1)
+	else:  # Last Quarter (default)
+		start_date = add_days(today, -91)
+		step_days = 7 if time_interval == "Weekly" else (1 if time_interval == "Daily" else 30)
+
+	opps = frappe.db.sql(
+		"""
+		SELECT creation
+		FROM `tabOpportunity`
+		WHERE creation >= %s
+		ORDER BY creation ASC
+		""",
+		(start_date,),
+		as_dict=True,
+	)
+
+	if not opps:
+		opps = frappe.db.sql(
+			"""
+			SELECT creation
+			FROM `tabOpportunity`
+			ORDER BY creation ASC
+			LIMIT 500
+			""",
+			as_dict=True,
+		)
+		if opps:
+			start_date = getdate(opps[0].creation)
+			today = getdate(opps[-1].creation)
+			if (today - start_date).days < 14:
+				start_date = add_days(today, -91)
+
+	# Generate clean interval date buckets
+	current = start_date
+	buckets = OrderedDict()
+	delta = timedelta(days=step_days)
+
+	while current <= today + timedelta(days=step_days):
+		label = current.strftime("%d-%m-%Y")
+		buckets[label] = {
+			"start": current,
+			"end": current + delta,
+			"count": 0,
+		}
+		current += delta
+
+	for opp in opps:
+		dt = getdate(opp.creation)
+		for label, b in buckets.items():
+			if b["start"] <= dt < b["end"]:
+				b["count"] += 1
+				break
+
+	labels = list(buckets.keys())
+	values = [b["count"] for b in buckets.values()]
+
+	return {
+		"labels": labels,
+		"datasets": [
+			{
+				"name": "Opportunity Trends",
+				"values": values,
+			}
+		],
+	}
+
+
+@frappe.whitelist()
+def get_won_opportunities_chart(timespan="Last Year", time_interval="Monthly"):
+	"""
+	Fetch chart data for Won Opportunities.
+	First checks standard Frappe Dashboard Chart 'Won Opportunities'.
+	If not found, aggregates directly from tabOpportunity with status Converted/Closed/Won.
+	"""
+	# 1. Try standard Frappe Dashboard Chart get
+	for chart_name in ["Won Opportunities", "Won Opportunity", "Converted Opportunities"]:
+		if frappe.db.exists("Dashboard Chart", chart_name):
+			try:
+				from frappe.desk.doctype.dashboard_chart.dashboard_chart import get
+				res = get(chart_name=chart_name, timespan=timespan, time_interval=time_interval, refresh=1)
+				if res and res.get("labels") and res.get("datasets"):
+					return res
+			except Exception as e:
+				frappe.log_error("Won Opportunities Dashboard Chart Error", str(e))
+
+	# 2. Direct aggregation fallback from tabOpportunity
+	from frappe.utils import add_days, getdate, nowdate
+	from datetime import timedelta
+	from collections import OrderedDict
+
+	today = getdate(nowdate())
+	if timespan == "Last Month":
+		start_date = add_days(today, -30)
+		step_days = 7 if time_interval == "Weekly" else (1 if time_interval == "Daily" else 30)
+	elif timespan == "Last Quarter":
+		start_date = add_days(today, -91)
+		step_days = 7 if time_interval == "Weekly" else (1 if time_interval == "Daily" else 30)
+	else:  # Last Year (default)
+		start_date = add_days(today, -365)
+		step_days = 30 if time_interval == "Monthly" else (7 if time_interval == "Weekly" else 1)
+
+	opps = frappe.db.sql(
+		"""
+		SELECT creation, modified
+		FROM `tabOpportunity`
+		WHERE status IN ('Converted', 'Closed', 'Won')
+		ORDER BY modified ASC
+		""",
+		as_dict=True,
+	)
+
+	if time_interval == "Monthly":
+		# Generate 13 monthly labels matching screenshot format (%b %Y)
+		labels = []
+		cur_m = today.replace(day=1)
+		for i in range(12, -1, -1):
+			m_date = add_days(cur_m, -i * 30).replace(day=1)
+			m_label = m_date.strftime("%b %Y")
+			if m_label not in labels:
+				labels.append(m_label)
+
+		values = [0] * len(labels)
+		for opp in opps:
+			dt = getdate(opp.modified or opp.creation)
+			lbl = dt.strftime("%b %Y")
+			if lbl in labels:
+				values[labels.index(lbl)] += 1
+
+		return {
+			"labels": labels,
+			"datasets": [
+				{
+					"name": "Won Opportunities",
+					"values": values,
+				}
+			],
+		}
+
+	# Interval-based bucketing fallback
+	current = start_date
+	buckets = OrderedDict()
+	delta = timedelta(days=step_days)
+
+	while current <= today + timedelta(days=step_days):
+		label = current.strftime("%d-%m-%Y")
+		if label not in buckets:
+			buckets[label] = {
+				"start": current,
+				"end": current + delta,
+				"count": 0,
+			}
+		current += delta
+
+	for opp in opps:
+		dt = getdate(opp.modified or opp.creation)
+		for label, b in buckets.items():
+			if b["start"] <= dt < b["end"]:
+				b["count"] += 1
+				break
+
+	labels = list(buckets.keys())
+	values = [b["count"] for b in buckets.values()]
+
+	return {
+		"labels": labels,
+		"datasets": [
+			{
+				"name": "Won Opportunities",
+				"values": values,
+			}
+		],
+	}
+
+
+@frappe.whitelist()
+def get_territory_wise_opportunity_chart():
+	"""
+	Fetch chart data for Territory Wise Opportunity Count (Donut chart).
+	"""
+	# 1. Try finding matching Dashboard Chart
+	chart_doc_name = None
+	for chart_name in ["Territory Wise Opportunity Count", "Territory Wise Opportunities"]:
+		if frappe.db.exists("Dashboard Chart", chart_name):
+			chart_doc_name = chart_name
+			break
+
+	if not chart_doc_name:
+		chart_doc_name = frappe.db.get_value(
+			"Dashboard Chart",
+			{"chart_name": ["like", "%Territor%"], "document_type": "Opportunity"},
+			"name",
+		)
+
+	if chart_doc_name:
+		try:
+			from frappe.desk.doctype.dashboard_chart.dashboard_chart import get
+			res = get(chart_name=chart_doc_name, refresh=1)
+			if res and res.get("labels") and res.get("datasets"):
+				return res
+		except Exception as e:
+			frappe.log_error("Territory Chart Error", str(e))
+
+	# 2. Fallback from tabOpportunity
+	territory_col = None
+	for col in ["territory", "country"]:
+		if frappe.db.has_column("Opportunity", col):
+			territory_col = col
+			break
+
+	data = []
+	if territory_col:
+		try:
+			data = frappe.db.sql(
+				f"""
+				SELECT `{territory_col}` as territory, COUNT(name) as count
+				FROM `tabOpportunity`
+				WHERE docstatus < 2 AND `{territory_col}` IS NOT NULL AND `{territory_col}` != ''
+				GROUP BY `{territory_col}`
+				ORDER BY count DESC
+				LIMIT 8
+				""",
+				as_dict=True,
+			)
+		except Exception:
+			data = []
+
+	if not data:
+		total_opps = frappe.db.count("Opportunity") if frappe.db.table_exists("Opportunity") else 2
+		if not total_opps:
+			total_opps = 2
+		return {
+			"labels": ["All Territories"],
+			"datasets": [{"values": [total_opps]}],
+		}
+
+	labels = [d.territory for d in data]
+	values = [d.count for d in data]
+
+	return {
+		"labels": labels,
+		"datasets": [{"values": values}],
+	}
+
+
+@frappe.whitelist()
+def get_opportunities_via_campaigns_chart():
+	"""
+	Fetch chart data for Opportunities via Campaigns (Pie chart).
+	"""
+	# 1. Try finding matching Dashboard Chart
+	chart_doc_name = None
+	for chart_name in ["Opportunities via Campaigns", "Opportunities via Campaign"]:
+		if frappe.db.exists("Dashboard Chart", chart_name):
+			chart_doc_name = chart_name
+			break
+
+	if not chart_doc_name:
+		chart_doc_name = frappe.db.get_value(
+			"Dashboard Chart",
+			{"chart_name": ["like", "%Campaign%"], "document_type": "Opportunity"},
+			"name",
+		)
+
+	if chart_doc_name:
+		try:
+			from frappe.desk.doctype.dashboard_chart.dashboard_chart import get
+			res = get(chart_name=chart_doc_name, refresh=1)
+			if res and res.get("labels") and res.get("datasets"):
+				return res
+		except Exception as e:
+			frappe.log_error("Campaigns Chart Error", str(e))
+
+	# 2. Fallback from tabOpportunity: check which column exists in ERPNext v15/v16
+	campaign_col = None
+	for col in ["utm_campaign", "campaign", "campaign_name", "source"]:
+		if frappe.db.has_column("Opportunity", col):
+			campaign_col = col
+			break
+
+	data = []
+	if campaign_col:
+		try:
+			data = frappe.db.sql(
+				f"""
+				SELECT `{campaign_col}` as campaign, COUNT(name) as count
+				FROM `tabOpportunity`
+				WHERE docstatus < 2 AND `{campaign_col}` IS NOT NULL AND `{campaign_col}` != ''
+				GROUP BY `{campaign_col}`
+				ORDER BY count DESC
+				LIMIT 8
+				""",
+				as_dict=True,
+			)
+		except Exception:
+			data = []
+
+	if not data:
+		total_opps = frappe.db.count("Opportunity") if frappe.db.table_exists("Opportunity") else 2
+		if not total_opps:
+			total_opps = 2
+		return {
+			"labels": ["Direct / Unassigned"],
+			"datasets": [{"values": [total_opps]}],
+		}
+
+	labels = [d.campaign for d in data]
+	values = [d.count for d in data]
+
+	return {
+		"labels": labels,
+		"datasets": [{"values": values}],
+	}
+
+
+
+
+
