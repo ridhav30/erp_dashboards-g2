@@ -93,13 +93,32 @@ def get_crm_summary():
 def on_crm_doc_change(doc=None, method=None):
 	"""
 	Publish real-time event via Frappe WebSocket whenever Lead, Opportunity, or Sales Order/Invoice changes.
-	after_commit=True ensures that the database transaction has committed before the browser is notified,
-	so the new record is immediately visible to get_crm_summary().
+	Transmits the live summary and updated chart payload directly over WebSockets so the client
+	updates instantaneously without making repeated HTTP API requests.
 	"""
 	try:
-		frappe.publish_realtime("crm_dashboard_update", after_commit=True)
-	except Exception:
-		pass
+		doctype = getattr(doc, "doctype", None)
+		summary = get_crm_summary()
+		leads_chart = get_incoming_leads_chart()
+		msg = {
+			"doctype": doctype,
+			"summary": summary,
+			"leads_chart": leads_chart,
+		}
+
+		if doctype == "Lead":
+			msg["lead_source_chart"] = get_lead_source_chart()
+		elif doctype == "Opportunity":
+			msg["opp_trends_chart"] = get_opportunity_trends_chart()
+			msg["won_opp_chart"] = get_won_opportunities_chart()
+			msg["territory_chart"] = get_territory_wise_opportunity_chart()
+			msg["campaigns_chart"] = get_opportunities_via_campaigns_chart()
+		elif doctype in ["Sales Order", "Sales Invoice"]:
+			msg["territory_sales_chart"] = get_territory_wise_sales_chart()
+
+		frappe.publish_realtime("crm_dashboard_update", message=msg, after_commit=True)
+	except Exception as e:
+		frappe.log_error("CRM on_crm_doc_change WebSocket Error", str(e))
 
 
 @frappe.whitelist()

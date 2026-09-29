@@ -951,34 +951,47 @@ frappe.pages['g2-crm-dashboard'].on_page_load = function(wrapper) {
 		load_won_opportunities_chart();
 	});
 
-	// --- REAL-TIME ENGINE ---
-	// 1. Listen to real-time events via Frappe WebSockets (Socket.IO)
-	frappe.realtime.on('crm_dashboard_update', function() {
-		load_crm_data();
-	});
+	// --- REAL-TIME WEBSOCKET ENGINE ---
+	// Listen to real-time events via Frappe WebSockets (Socket.IO).
+	// Zero HTTP requests: receives updated summary and charts directly over WebSocket.
+	frappe.realtime.on('crm_dashboard_update', function(data) {
+		if (data && data.summary) {
+			render_crm_data(data.summary);
 
-	frappe.realtime.on('doc_update', function(data) {
-		if (data && (data.doctype === 'Lead' || data.doctype === 'Opportunity' || data.doctype === 'Sales Order' || data.doctype === 'Sales Invoice')) {
-			load_crm_data();
-		}
-	});
-
-	frappe.realtime.on('list_update', function(data) {
-		if (data && (data.doctype === 'Lead' || data.doctype === 'Opportunity' || data.doctype === 'Sales Order' || data.doctype === 'Sales Invoice')) {
-			load_crm_data();
-		}
-	});
-
-	// 2. Real-time auto-polling interval (every 8 seconds)
-	var live_timer = setInterval(function() {
-		if ($('.g2-crm-dashboard').length) {
-			load_crm_data();
+			if (data.leads_chart) {
+				render_incoming_leads_chart(data.leads_chart);
+				$('#leads-chart-sync-time').text(__('Live via WebSocket'));
+			}
+			if (data.lead_source_chart) {
+				render_lead_source_chart(data.lead_source_chart);
+				$('#lead-source-sync-time').text(__('Live via WebSocket'));
+			}
+			if (data.opp_trends_chart) {
+				render_opportunity_trends_chart(data.opp_trends_chart);
+				$('#opp-chart-sync-time').text(__('Live via WebSocket'));
+			}
+			if (data.won_opp_chart) {
+				render_won_opportunities_chart(data.won_opp_chart);
+				$('#won-chart-sync-time').text(__('Live via WebSocket'));
+			}
+			if (data.territory_chart) {
+				render_territory_chart(data.territory_chart);
+				$('#territory-chart-sync-time').text(__('Live via WebSocket'));
+			}
+			if (data.campaigns_chart) {
+				render_campaigns_chart(data.campaigns_chart);
+				$('#campaigns-chart-sync-time').text(__('Live via WebSocket'));
+			}
+			if (data.territory_sales_chart) {
+				render_territory_sales_chart(data.territory_sales_chart);
+				$('#territory-sales-sync-time').text(__('Live via WebSocket'));
+			}
 		} else {
-			clearInterval(live_timer);
+			load_crm_data();
 		}
-	}, 8000);
+	});
 
-	// 3. Real-time auto-refresh when window/tab regains focus
+	// Re-sync when window/tab regains focus
 	$(window).on('focus.crm_dashboard', function() {
 		if ($('.g2-crm-dashboard').length) {
 			load_crm_data();
@@ -987,10 +1000,7 @@ frappe.pages['g2-crm-dashboard'].on_page_load = function(wrapper) {
 
 	// Clean up listeners when navigating away from the page
 	wrapper.addEventListener('remove', function() {
-		clearInterval(live_timer);
 		frappe.realtime.off('crm_dashboard_update');
-		frappe.realtime.off('doc_update');
-		frappe.realtime.off('list_update');
 		$(window).off('focus.crm_dashboard');
 		$(page.main).off('change', '#select-chart-timespan, #select-chart-interval');
 		$(page.main).off('change', '#select-opp-chart-timespan, #select-opp-chart-interval');
