@@ -1003,17 +1003,9 @@ frappe.pages['g2-crm-dashboard'].on_page_load = function(wrapper) {
 		}
 	});
 
-	// Re-sync when window/tab regains focus
-	$(window).on('focus.crm_dashboard', function() {
-		if ($('.g2-crm-dashboard').length) {
-			load_crm_data();
-		}
-	});
-
 	// Clean up listeners when navigating away from the page
 	wrapper.addEventListener('remove', function() {
 		frappe.realtime.off('crm_dashboard_update');
-		$(window).off('focus.crm_dashboard');
 		$(page.main).off('change', '#select-chart-timespan, #select-chart-interval');
 		$(page.main).off('change', '#select-opp-chart-timespan, #select-opp-chart-interval');
 		$(page.main).off('change', '#select-won-chart-timespan, #select-won-chart-interval');
